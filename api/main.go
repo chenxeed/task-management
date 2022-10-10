@@ -1,9 +1,12 @@
 package main
 
 import (
+	"fmt"
+	lib "lib"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	cors "github.com/rs/cors/wrapper/gin"
 )
 
 type TaskStatus int64
@@ -48,9 +51,12 @@ func postTask(c *gin.Context) {
 }
 
 func main() {
+	fmt.Println(lib.GoDotEnvVariable("VITE_WEBAPP_HOST"))
 	router := gin.Default()
-	router.GET("/tasks", getTasks)
-	router.POST("/task", postTask)
-	// TODO: Determine the root URL via .env for cross-environment
-	router.Run("localhost:5050")
+	router.Use(cors.Default())
+	router.GET("tasks", getTasks)
+	router.POST("task", postTask)
+	// TODO: Determine the root URL via .env for cross-
+	routerPath := lib.GoDotEnvVariable("API_HOST")
+	router.Run(routerPath)
 }
