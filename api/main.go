@@ -4,6 +4,7 @@ import (
 	"fmt"
 	lib "lib"
 	"net/http"
+	"sort"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -39,6 +40,9 @@ func getTasks(c *gin.Context) {
 	for _, v := range tasks {
 		arr = append(arr, v)
 	}
+	sort.Slice(arr, func(i, j int) bool {
+		return arr[i].CreateDate < arr[j].CreateDate
+	})
 	c.IndentedJSON(http.StatusOK, arr)
 }
 
