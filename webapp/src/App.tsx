@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import './App.css'
 import TaskForm from './components/TaskForm'
 import TaskList from './components/TaskList'
 import { getTasks, createTask, updateTask } from './network/task'
@@ -39,8 +38,8 @@ function App() {
   const onCancelEditTask = () => setTaskToEdit('')
 
   return (
-    <div className="App">
-      <h1 className="text-xl">Task Management</h1>
+    <div className="mx-10 mt-5">
+      <h1 className="text-xl text-center">Task Management</h1>
       <hr className="mt-2"></hr>
       <div className='mt-5'>
         <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={ () => setShowCreateForm(true) }>
