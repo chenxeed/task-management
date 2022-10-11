@@ -9,14 +9,6 @@ import (
 	cors "github.com/rs/cors/wrapper/gin"
 )
 
-type TaskStatus int64
-
-const (
-	NotUrgent TaskStatus = iota
-	DueSoon
-	Overdue
-)
-
 // getTask responds with the list of all tasks as JSON.
 func getTasks(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, data.ReadTasks())
