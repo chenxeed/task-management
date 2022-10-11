@@ -3,24 +3,25 @@ import './App.css'
 import TaskForm from './components/TaskForm'
 import TaskList from './components/TaskList'
 import { getTasks, createTask, updateTask } from './network/task'
+import { readTasksState, updateTasksState } from './store/task'
 import { Task } from './typings/task'
 
 function App() {
 
-  const [tasks, setTasks] = useState<Task[]>([])
+  const tasks = readTasksState()
   const [showCreateForm, setShowCreateForm] = useState<boolean>(false)
   const [taskToEdit, setTaskToEdit] = useState<Task['id']>('')
 
   // TODO: Fetch from the state management
   useEffect(() => {
     getTasks().then(resp => {
-      setTasks(resp)
+      updateTasksState(resp)
     })
   }, [])
 
   const onCreateNewTask = (newTask: Task) => {
     createTask(newTask).then(newTask => {
-      setTasks([
+      updateTasksState([
         ...tasks,
         newTask
       ])
@@ -30,7 +31,7 @@ function App() {
   }
   const onUpdateTask = (taskId: string, updatedTask: Task) => {
     updateTask(taskId, updatedTask).then(updatedTask => {
-      setTasks(tasks.map(task => task.id === taskId ? updatedTask : task))
+      updateTasksState(tasks.map(task => task.id === taskId ? updatedTask : task))
       setTaskToEdit('')
     })
   }
