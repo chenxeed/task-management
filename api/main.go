@@ -4,8 +4,10 @@ import (
 	"fmt"
 	lib "lib"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	cors "github.com/rs/cors/wrapper/gin"
 )
 
@@ -21,8 +23,8 @@ type task struct {
 	Id          string `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"desc"`
-	DueDate     int    `json:"dueDate"`
-	CreateDate  int    `json:"createdDate"`
+	DueDate     int64  `json:"dueDate"`
+	CreateDate  int64  `json:"createdDate"`
 }
 
 // TODO: Get the data via PostgreSQL
@@ -45,6 +47,10 @@ func postTask(c *gin.Context) {
 		return
 	}
 
+	newTask.Id = (uuid.New()).String()
+	now := time.Now()
+	newTask.CreateDate = now.UnixMilli()
+
 	// Add the new album to the slice.
 	tasks = append(tasks, newTask)
 	c.IndentedJSON(http.StatusCreated, newTask)
@@ -56,7 +62,6 @@ func main() {
 	router.Use(cors.Default())
 	router.GET("tasks", getTasks)
 	router.POST("task", postTask)
-	// TODO: Determine the root URL via .env for cross-
 	routerPath := lib.GoDotEnvVariable("API_HOST")
 	router.Run(routerPath)
 }
