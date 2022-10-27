@@ -1,8 +1,8 @@
 package main
 
 import (
-	data "data"
-	lib "lib"
+	data "api/data"
+	lib "api/lib"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
