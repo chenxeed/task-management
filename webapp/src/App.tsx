@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react'
 import TaskForm from './components/TaskForm'
 import TaskList from './components/TaskList'
 import { getTasks, createTask, updateTask } from './network/task'
-import { readTasksState, updateTasksState } from './store/task'
+import { useTask } from './store/useTask'
 import { Task } from './typings/task'
 
 function App() {
+
+  const { readTasksState, replaceTasksState, appendTaskState, updateTaskState } = useTask()
 
   const tasks = readTasksState()
   const [showCreateForm, setShowCreateForm] = useState<boolean>(false)
@@ -14,23 +16,20 @@ function App() {
   // TODO: Fetch from the state management
   useEffect(() => {
     getTasks().then(resp => {
-      updateTasksState(resp)
+      replaceTasksState(resp)
     })
   }, [])
 
   const onCreateNewTask = (newTask: Task) => {
     createTask(newTask).then(newTask => {
-      updateTasksState([
-        ...tasks,
-        newTask
-      ])
+      appendTaskState(newTask)
       alert(`Successfully create new task (ID: ${newTask.id}`)
       setShowCreateForm(false)
     })
   }
   const onUpdateTask = (taskId: string, updatedTask: Task) => {
     updateTask(taskId, updatedTask).then(updatedTask => {
-      updateTasksState(tasks.map(task => task.id === taskId ? updatedTask : task))
+      updateTaskState(taskId, updatedTask)
       setTaskToEdit('')
     })
   }
