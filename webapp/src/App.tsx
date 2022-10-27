@@ -48,7 +48,7 @@ function App() {
         {showCreateForm && <div className='border mt-2 bg-green-50'><TaskForm onSubmit={ onCreateNewTask } onCancel={ onCancelNewTask }/></div> }
       </div>
       <div className='mt-5'>
-        {tasks.map(task => <div className="even:bg-slate-100">
+        {tasks.map(task => <div key={task.id} className="even:bg-slate-100">
           { taskToEdit === task.id ?
             <TaskForm task={task} onSubmit={ updatedTask => onUpdateTask(task.id, updatedTask) } onCancel={ onCancelEditTask }/> :
             <div className='relative'>
