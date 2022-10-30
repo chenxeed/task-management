@@ -11,13 +11,17 @@ function App() {
 
   const tasks = readTasksState()
   const [showCreateForm, setShowCreateForm] = useState<boolean>(false)
-  const [taskToEdit, setTaskToEdit] = useState<Task['id']>('')
+  const [taskToEdit, setTaskToEdit] = useState<Task['id']>(0)
 
-  // TODO: Fetch from the state management
   useEffect(() => {
-    getTasks().then(resp => {
+    const abortController = new AbortController()
+    getTasks(abortController).then(resp => {
       replaceTasksState(resp)
     })
+
+    return () => {
+      abortController.abort()
+    }
   }, [])
 
   const onCreateNewTask = (newTask: Task) => {
@@ -27,14 +31,14 @@ function App() {
       setShowCreateForm(false)
     })
   }
-  const onUpdateTask = (taskId: string, updatedTask: Task) => {
+  const onUpdateTask = (taskId: Task['id'], updatedTask: Task) => {
     updateTask(taskId, updatedTask).then(updatedTask => {
       updateTaskState(taskId, updatedTask)
-      setTaskToEdit('')
+      setTaskToEdit(0)
     })
   }
   const onCancelNewTask = () => setShowCreateForm(false)
-  const onCancelEditTask = () => setTaskToEdit('')
+  const onCancelEditTask = () => setTaskToEdit(0)
 
   return (
     <div className="mx-10 mt-5">

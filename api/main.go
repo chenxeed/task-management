@@ -3,26 +3,30 @@ package main
 import (
 	data "api/data"
 	lib "api/lib"
+	"context"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	cors "github.com/rs/cors/wrapper/gin"
+	"github.com/uptrace/bun"
 )
+
+var ctx context.Context
+var db *bun.DB
 
 // getTask responds with the list of all tasks as JSON.
 func getTasks(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, data.ReadTasks())
+	c.IndentedJSON(http.StatusOK, data.ReadTasks(ctx, *db))
 }
 
 func postTask(c *gin.Context) {
 	var newTask data.Task
 
-	// Call BindJSON to bind the received JSON to
-	// newAlbum.
 	if err := c.BindJSON(&newTask); err != nil {
+		println(err.Error())
 		return
 	}
-	newTask = data.CreateTask(newTask)
+	newTask = data.CreateTask(ctx, *db, newTask)
 	c.IndentedJSON(http.StatusCreated, newTask)
 }
 
@@ -30,17 +34,20 @@ func putTask(c *gin.Context) {
 	var updatedTask data.Task
 
 	taskId := c.Param("id")
-	// Call BindJSON to bind the received JSON to
-	// newAlbum.
 	if err := c.BindJSON(&updatedTask); err != nil {
 		return
 	}
 
-	updatedTask = data.UpdateTask(taskId, updatedTask)
+	updatedTask = data.UpdateTask(ctx, *db, taskId, updatedTask)
 	c.IndentedJSON(http.StatusOK, updatedTask)
 }
 
 func main() {
+	// Define the database
+	ctx = context.Background()
+	db = data.ConnectDB()
+	data.CreateTaskTable(ctx, *db)
+
 	router := gin.Default()
 	router.Use(cors.Default())
 	router.GET("tasks", getTasks)

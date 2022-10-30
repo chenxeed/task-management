@@ -5,7 +5,7 @@ import dayjs from 'dayjs'
 function TaskForm(props: { task?: Task, onSubmit: (task: Task) => void, onCancel: () => void }) {
 
   const [task, setTask] = useState<Task>(props.task ? props.task : {
-    id: '',
+    id: 0,
     name: '',
     desc: '',
     dueDate: dayjs().valueOf(),

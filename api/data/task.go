@@ -1,49 +1,67 @@
 package data
 
 import (
-	"sort"
+	"context"
+	"database/sql"
+	"fmt"
 	"time"
 
-	"github.com/google/uuid"
+	"github.com/uptrace/bun"
 )
 
 type Task struct {
-	Id          string `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"desc"`
-	DueDate     int64  `json:"dueDate"`
-	CreateDate  int64  `json:"createdDate"`
+	bun.BaseModel `bun:"table:tasks"`
+
+	Id          int64  `bun:"id,pk,autoincrement" json:"id"`
+	Name        string `bun:"name,notnull" json:"name"`
+	Description string `bun:"desc,notnull" json:"desc"`
+	DueDate     int64  `bun:"due_date,notnull" json:"dueDate"`
+	CreateDate  int64  `bun:"create_date,notnull" json:"createdDate"`
 }
 
-// TODO: Get the data via PostgreSQL
-var tasks = map[string]Task{
-	"1": {Id: "1", Name: "Open email", Description: "Find the new email that sent from our newest client", DueDate: 1675513005240, CreateDate: 1665213005240},
-	"2": {Id: "2", Name: "Read the book", Description: "You bought a new book. Now read it.", DueDate: 1675514005240, CreateDate: 1665213005240},
-}
-
-// getTask responds with the list of all tasks as JSON.
-func ReadTasks() []Task {
-	arr := []Task{}
-	for _, v := range tasks {
-		arr = append(arr, v)
+func CreateTaskTable(ctx context.Context, db bun.DB) sql.Result {
+	res, err := db.NewCreateTable().Model((*Task)(nil)).Exec(ctx)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println("table task created")
 	}
-	sort.Slice(arr, func(i, j int) bool {
-		return arr[i].CreateDate < arr[j].CreateDate
-	})
-	return arr
+	return res
 }
 
-func CreateTask(newTask Task) Task {
-	newTask.Id = (uuid.New()).String()
+func ReadTasks(ctx context.Context, db bun.DB) []Task {
+	var tasks []Task
+	err := db.NewSelect().Model(&tasks).Scan(ctx)
+	if err != nil {
+		fmt.Println(err)
+	}
+	if tasks == nil {
+		emptyTask := []Task{}
+		return emptyTask
+	} else {
+		return tasks
+	}
+}
+
+func CreateTask(ctx context.Context, db bun.DB, newTask Task) Task {
 	now := time.Now()
 	newTask.CreateDate = now.UnixMilli()
 
-	// Add the new album to the slice.
-	tasks[newTask.Id] = newTask
+	res, err := db.NewInsert().Model(&newTask).Exec(ctx)
+	if err != nil {
+		println("gagal")
+		fmt.Println(err.Error())
+	} else {
+		println("sukses")
+		println(res.LastInsertId())
+	}
 	return newTask
 }
 
-func UpdateTask(taskId string, updatedTask Task) Task {
-	tasks[taskId] = updatedTask
+func UpdateTask(ctx context.Context, db bun.DB, taskId string, updatedTask Task) Task {
+	_, err := db.NewUpdate().Model(&updatedTask).WherePK().Exec(ctx)
+	if err != nil {
+		fmt.Println(err)
+	}
 	return updatedTask
 }
